@@ -8,3 +8,5 @@ router.post("/signup", signup);
 router.post("/signin", signin);
 router.get("/getMe", protectRoute, getMe);
 router.post("/logout", protectRoute, logout);
+
+export default router;

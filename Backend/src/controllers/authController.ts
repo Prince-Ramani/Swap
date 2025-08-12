@@ -16,6 +16,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password }: userInterface = req.body;
 
+    console.log(username, password);
+
     if (
       !username ||
       username.trim().length < 3 ||
@@ -30,7 +32,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     const userAlreadyExist = await User.exists({ username });
 
     if (userAlreadyExist) {
-      res.status(400).json({ error: "Account with username already exists." });
+      res
+        .status(400)
+        .json({ error: "Account with this username already exists." });
       return;
     }
 
@@ -90,7 +94,7 @@ export const signin = async (req: Request, res: Response): Promise<void> => {
     if (!person) {
       res
         .status(404)
-        .json({ error: "Account with this Username is not registered." });
+        .json({ error: "Account with this username is not registered." });
       return;
     }
 
