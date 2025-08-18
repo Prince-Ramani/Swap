@@ -109,12 +109,12 @@ const Signin = () => {
                 disabled={isPending}
                 onClick={handleClick}
               >
-                Sign up
+                Sign in
               </Button>
               <div>
                 Don't have an account?{" "}
                 <a href="/signup" className="underline" aria-label="signup">
-                  Sign in
+                  Sign up
                 </a>
               </div>
             </div>

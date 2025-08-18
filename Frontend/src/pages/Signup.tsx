@@ -13,7 +13,7 @@ const Signup = () => {
 
   const queryclient = useQueryClient();
 
-  const [verifyPass, setVerifyPass] = useState("");
+  // const [verifyPass, setVerifyPass] = useState("");
 
   const {
     mutate: signUp,
@@ -59,14 +59,14 @@ const Signup = () => {
 
     const passStrenght = validatePasswordStrength(info.password);
 
-    if (!passStrenght.valid) {
-      toast.error(passStrenght.message);
-      return;
-    }
+    // if (!passStrenght.valid) {
+    //   toast.error(passStrenght.message);
+    //   return;
+    // }
 
-    if (info.password !== verifyPass) {
-      return toast.error("Verification password doesn't match!");
-    }
+    // if (info.password !== verifyPass) {
+    //   return toast.error("Verification password doesn't match!");
+    // }
 
     signUp();
   };
@@ -108,7 +108,7 @@ const Signup = () => {
               />
             </div>
           </label>
-          <label htmlFor="confirmpassword">
+          {/*         <label htmlFor="confirmpassword">
             <div className=" border gap-2 w-full group    p-2 flex items-center  bg-muted rounded-sm ">
               <Lock className="text-gray-400/90 size-5 shrink-0 " />
               <input
@@ -120,6 +120,7 @@ const Signup = () => {
               />
             </div>
           </label>
+          */}
           <div className="flex flex-col h-fit ">
             {data && "error" in data ? (
               <div className="text-red-700 text-sm sm:text-base   cursor-default px-1 flex gap-2 items-center pb-2">

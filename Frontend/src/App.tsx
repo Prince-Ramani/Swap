@@ -22,34 +22,24 @@ function App() {
   >({
     queryKey: ["authUser"],
     queryFn: async () => {
-      try {
-        const res = await fetch("/api/auth/getMe");
-        if (!res.ok) {
-          let errorMessage = "Something went wrong!";
-          try {
-            const errorData = await res.json();
-            if (errorData?.error && typeof errorData.error === "string")
-              errorMessage = errorData.error;
-          } catch (err) {
-            console.error("Failed to parse error response from server", err);
-            errorMessage =
-              "Failed to process authorization request. Please try again later.";
-          }
-          throw new Error(errorMessage);
+      const res = await fetch("/api/auth/getMe");
+      if (!res.ok) {
+        let errorMessage = "Something went wrong!";
+        try {
+          const errorData = await res.json();
+          if (errorData?.error && typeof errorData.error === "string")
+            errorMessage = errorData.error;
+        } catch (err) {
+          console.error("Failed to parse error response from server", err);
+          errorMessage =
+            "Failed to process authorization request. Please try again later.";
         }
-        const data: userInterface | ApiError = await res.json();
-
-        if (!!data && "_id" in data) setAuthUser(data);
-        return data;
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          console.error("Error occured in authorization", err.message);
-          throw err;
-        } else {
-          console.error("Unexpected error occured in authorization", err);
-          throw new Error("Unexpected error occured in authorization");
-        }
+        throw new Error(errorMessage);
       }
+      const data: userInterface | ApiError = await res.json();
+
+      if (!!data && "_id" in data) setAuthUser(data);
+      return data;
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -58,7 +48,7 @@ function App() {
 
   if (isError) {
     console.error(
-      error.message || "Somethinf went wrong.Plesae try again later",
+      error.message || "Something went wrong.Plesae try again later",
     );
   }
 
@@ -80,7 +70,11 @@ function App() {
           element={isAuthUser ? <Navigate to="/home" /> : <Signin />}
         />
 
-        <Route path="/home" element={<Home />} />
+        <Route
+          path="/home"
+          element={isAuthUser ? <Home /> : <Navigate to="/signup" />}
+        />
+
         <Route
           path="*"
           element={<Navigate to={isAuthUser ? "/home" : "/signup"} />}

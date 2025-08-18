@@ -5,9 +5,7 @@ import connectMongo from "./connect";
 import cookieParser from "cookie-parser";
 
 import authRouter from "./routers/auth";
-
-console.log(__dirname);
-
+import projectRouter from "./routers/project";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 const app = express();
 
@@ -17,6 +15,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRouter);
+app.use("/api/project", projectRouter);
 
 app.get("*", (req: Request, res: Response) => {
   console.log("No such api found", req.url);

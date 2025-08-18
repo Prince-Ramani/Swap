@@ -16,8 +16,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password }: userInterface = req.body;
 
-    console.log(username, password);
-
     if (
       !username ||
       username.trim().length < 3 ||
