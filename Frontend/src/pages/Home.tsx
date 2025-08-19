@@ -23,7 +23,7 @@ const Home = () => {
   const fileInputRef = useRef<null | HTMLInputElement>(null);
   const [search, setSearch] = useState("");
   const [allProjects, setAllProjects] = useState<projectInterface[] | []>([]);
-  const { isLoading: isFetchingProjects } = useQuery({
+  const { isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const res = await fetch("/api/project/getProjects");
@@ -41,7 +41,7 @@ const Home = () => {
         } catch (error) {
           console.error("Error parsing error response from server : ", error);
           errorMessage =
-            "Failed to process logout response. Please try again later.";
+            "Failed to process server response. Please try again later.";
         }
         console.error(errorMessage);
         return null;
@@ -51,6 +51,7 @@ const Home = () => {
       return null;
     },
   });
+
   const { mutate: logout, isPending } = useMutation<LogoutResponse, Error>({
     mutationFn: async () => {
       const res = await fetch("/api/auth/logout", {
@@ -124,7 +125,7 @@ const Home = () => {
         } catch (error) {
           console.error("Error parsing error response from server : ", error);
           errorMessage =
-            "Failed to process logout response. Please try again later.";
+            "Failed to process server response. Please try again later.";
         }
         throw new Error(errorMessage);
       }
@@ -133,11 +134,12 @@ const Home = () => {
     },
 
     onSuccess: async (data) => {
-      if ("error" in data) {
+      if (!!data && "error" in data) {
         toast.error(data.error);
-        console.error("Failed to upload and folder", data.error);
+        console.error("Failed to upload an folder", data.error);
       } else {
         toast.success(data.message);
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
       }
     },
     onError: async (error) => {
@@ -191,7 +193,7 @@ const Home = () => {
               id="folder"
               placeholder="Search Project"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value.trim())}
             />
           </div>
         </label>
@@ -219,20 +221,42 @@ const Home = () => {
         <div
           className={` flex flex-col  gap-2  w-full h-full   max-w-6xl  rounded-xl p-1 md:p-2  min-h-72 ${allProjects.length === 0 ? "items-center justify-center" : ""} `}
         >
-          <div className=" hidden w-full md:flex items-center  justify-between p-3 md:px-5 bg-card rounded-lg text-xs sm:text-xs md:text-base ">
-            <div className="w-2/6 grid place-items-start ">File Name</div>
-            <div className="w-1/6 grid place-items-center ">Time</div>
-            <div className="w-1/6 grid place-items-center ">Size</div>
-            <div className="w-2/6 grid place-items-end ">Download</div>
-          </div>
-          {allProjects.length > 0 ? (
-            allProjects.map((file) => {
-              return <DisplayFile key={file._id} file={file} />;
-            })
-          ) : (
-            <div className="flex justify-center items-center text-xl ">
-              No projects uploaded.
+          {allProjects.length > 0 && !isLoadingProjects ? (
+            <div className=" hidden w-full md:flex items-center  justify-between p-3 md:px-5 bg-card rounded-lg text-xs sm:text-xs md:text-base ">
+              <div className="w-2/6 grid place-items-start ">File Name</div>
+              <div className="w-1/6 grid place-items-center ">Time</div>
+              <div className="w-1/6 grid place-items-center ">Size</div>
+              <div className="w-1/6 grid place-items-end ">Delete</div>
+              <div className="w-1/6 grid place-items-end ">Download</div>
             </div>
+          ) : (
+            ""
+          )}
+          {allProjects.length > 0 && !search.trim()
+            ? allProjects.map((file) => {
+                return <DisplayFile key={file._id} file={file} />;
+              })
+            : ""}
+
+          {allProjects.length > 0 && search.trim().length > 0
+            ? allProjects.map((file) => {
+                const includes = file.projectName.includes(search);
+                if (includes)
+                  return (
+                    <DisplayFile
+                      key={file._id}
+                      file={file}
+                      searchVal={search}
+                    />
+                  );
+                else return "";
+              })
+            : ""}
+
+          {allProjects.length === 0 && !isLoadingProjects ? (
+            <div>No Projects found!</div>
+          ) : (
+            ""
           )}
         </div>
       </div>

@@ -34,11 +34,10 @@ export const uploadProject = async (
     }
     try {
       const rs = await cloudinary.uploader.upload(file.path, {
-        resource_type: "auto",
+        resource_type: "raw",
         folder: "Swap/projectszZipped",
       });
-
-      await unlink(`../uploads/${file.path}`);
+      await unlink(file.path);
       uploadedUrl = rs.secure_url;
       const arr = ["Bytes", "KB", "MB", "GB"];
       const i = Math.floor(Math.log(rs.bytes) / Math.log(1024));
@@ -46,6 +45,7 @@ export const uploadProject = async (
       uploadedFileSize = `${val.toFixed(2)} ${arr[i]}`;
     } catch (err) {
       failedToUpload = true;
+      console.error("Error while uploading files : ", err);
     }
 
     if (failedToUpload) {
@@ -91,7 +91,6 @@ export const deleteProject = async (
       return;
     }
     const { projectID } = req.body;
-
     if (!projectID || !isValidObjectId(projectID)) {
       res.status(400).json({ error: "Invalid Project ID" });
       return;
@@ -105,7 +104,7 @@ export const deleteProject = async (
 
     const proj = await Projects.findById(projectID);
 
-    if (!proj || proj.user === user._id) {
+    if (!proj) {
       res.status(404).json({ error: "No such project found!" });
       return;
     }
@@ -116,10 +115,12 @@ export const deleteProject = async (
         .split("/")
         .splice(-1)[0]
         .split(".")[0];
+
       const zipId = `Swap/projectszZipped/${cloudinaryId}`;
       const rs = await cloudinary.uploader.destroy(zipId, {
-        resource_type: "auto",
+        resource_type: "raw",
       });
+
       if (rs.result !== "ok") failedToDelete = true;
     } catch (err) {
       failedToDelete = true;
@@ -127,7 +128,9 @@ export const deleteProject = async (
     }
 
     if (failedToDelete) {
-      res.status(400).json("Failed to delete files now.Please try again later");
+      res
+        .status(400)
+        .json({ error: "Failed to delete files now.Please try again later" });
       return;
     }
 
